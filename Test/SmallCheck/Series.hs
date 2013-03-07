@@ -25,9 +25,10 @@
 
 {-# LANGUAGE CPP, RankNTypes, MultiParamTypeClasses, FlexibleInstances,
              GeneralizedNewtypeDeriving, FlexibleContexts #-}
--- The following is needed for generic instances
-{-# LANGUAGE DefaultSignatures, FlexibleContexts, TypeOperators,
-             TypeSynonymInstances, FlexibleInstances #-}
+
+#ifdef GENERICS
+{-# LANGUAGE DefaultSignatures , TypeOperators , TypeSynonymInstances #-}
+#endif
 
 module Test.SmallCheck.Series (
   -- {{{
@@ -165,7 +166,9 @@ import Control.Applicative
 import Control.Monad.Identity
 import Data.List
 import Test.SmallCheck.SeriesMonad
+#ifdef GENERICS
 import GHC.Generics
+#endif
 
 ------------------------------
 -- Main types and classes
@@ -175,8 +178,10 @@ import GHC.Generics
 class Monad m => Serial m a where
   series   :: Series m a
 
+#ifdef GENERICS
   default series :: (Generic a, GSerial m (Rep a)) => Series m a
   series = to <$> gSeries
+#endif
 
 class Monad m => CoSerial m a where
   -- | A proper 'coseries' implementation should pass the depth unchanged to
@@ -184,8 +189,10 @@ class Monad m => CoSerial m a where
   -- functions non-uniform in their arguments.
   coseries :: Series m b -> Series m (a->b)
 
+#ifdef GENERICS
   default coseries :: (Generic a, GCoSerial m (Rep a)) => Series m b -> Series m (a->b)
   coseries rs = (. from) <$> gCoseries rs
+#endif
 
 -- }}}
 
@@ -342,7 +349,7 @@ newtypeAlts = coseries
 -- Generic instances
 ------------------------------
 -- {{{
-
+#ifdef GENERICS
 class GSerial m f where
   gSeries :: Series m (f a)
 class GCoSerial m f where
@@ -390,6 +397,7 @@ instance (Monad m, GCoSerial m a, GCoSerial m b) => GCoSerial m (a :+: b) where
       L1 x -> f x
       R1 y -> g y
   {-# INLINE gCoseries #-}
+#endif
 
 -- }}}
 

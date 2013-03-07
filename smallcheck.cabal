@@ -31,7 +31,7 @@ Source-repository this
 
 Library
 
-    Build-Depends: base == 4.*, mtl, logict, ghc-prim >= 0.2, pretty
+    Build-Depends: base == 4.*, mtl, logict, pretty
 
     Exposed-modules:
         Test.SmallCheck
@@ -41,3 +41,8 @@ Library
         Test.SmallCheck.Property
         Test.SmallCheck.SeriesMonad
         Test.SmallCheck.Property.Result
+
+    if impl(ghc >= 7.2.1)
+      cpp-options: -DGENERICS
+      build-depends: ghc-prim >= 0.2
+
